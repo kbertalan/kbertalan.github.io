@@ -1,14 +1,14 @@
 ---
 layout: post
-title: Prevent inalid input with dependent types
+title: Prevent invalid input with dependent types
+featured: true
+author: Bertalan Kis
 tags:
   - idris
   - dependent types
   - type level programming
   - example
 ---
-
-# Prevent inalid input with dependent types
 
 As an application developer I've always wanted to enhance developer experience. The most common tool for this is a statically typed programming language.
 It is fascinating what such programming languages can do in compile time, and what amount of issues they can prevent at runtime.
