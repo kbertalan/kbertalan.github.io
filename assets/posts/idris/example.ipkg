@@ -1,0 +1,9 @@
+package example
+
+modules = Path
+  , Main
+
+depends = base
+
+main = Main
+executable = example
