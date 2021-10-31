@@ -1,0 +1,14 @@
+@import "jekyll-theme-minimal";
+
+@media print, screen and (min-width: 1360px) {
+  .wrapper {
+    width:1260px;
+    margin:0 auto;
+  }
+
+  section {
+    width:900px;
+    float:right;
+    padding-bottom:50px;
+  }
+}
