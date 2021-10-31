@@ -243,7 +243,7 @@ The below examples are failing, due to compile error (as you can see the compile
   ignore $ pure $ pattern ("/" <+> static <+> "/*") $ MkRequest "/index.html"
 ```
 
-If you want to see these examples, and the rest of the implementation in action, you can find the source code on [github]().
+If you want to see these examples, and the rest of the implementation in action, you can find the source code on [github](https://github.com/kbertalan/kbertalan.github.io/tree/main/assets/posts/idris).
 
 #### Conclusion
 
