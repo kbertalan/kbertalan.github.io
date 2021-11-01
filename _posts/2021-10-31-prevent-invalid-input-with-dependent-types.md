@@ -23,7 +23,7 @@ We are developing a simple web framework to be able to serve web APIs and files.
 
 In this example we will ignore the problem how to associate a handler function a matched route, and concentrate on how to implement the route selection only.
 
-As we plan to make the users of the framework life easier we provide a function which can accept a route as string and returns another function which can replace a string based path with a proper path model if the path matches the route.
+As we plan to make the users of the framework life easier we provide a function which can accept a route as string and provides another function which can replace a string based path with a proper path model if the path matches the route.
 
 Let model this with the following types and function:
 
@@ -47,6 +47,7 @@ pattern : String -- route pattern as a String
   -> Maybe $ Request Path -- HTTP request which path is a resolved route
 pattern str req = ?pattern_rhs
 ```
+_See documentation of records [here](https://idris2.readthedocs.io/en/latest/tutorial/typesfuns.html#records)_
 
 This is nice, but how should the `pattern` function behave, when the route pattern is invalid?
 
@@ -64,9 +65,9 @@ This would expose our route pattern model to the outside and we would need to wo
 
 While this is a viable option I would prefer to use a more compact representation and stick to the original plan to use `String` for patterns.
 
-##### Return Nothing
+##### Use Nothing for signaling the invalid route
 
-We also can choose to return Nothing when the route is invalid. We either change the `pattern` function to this:
+We also can choose to use Nothing when the route is invalid. We either change the `pattern` function to this:
 
 ``` haskell
 export
@@ -78,7 +79,7 @@ pattern : String -- route pattern as a String
 pattern str = ?pattern_rhs
 ```
 
-or return Nothing when we receive the request.
+or compute Nothing when we receive the request.
 
 The first option requires the developer to handle route syntax errors when all routes are valid.
 
@@ -150,7 +151,7 @@ Also note that `parse` function is annotated with `public export`, which exposes
 
 #### Parse route for pattern function
 
-First let assume we have everything at hand, the path from the HTTP request and a valid, parsed route pattern. Let's define a function to do the matching and returns a resolved `Path` value for us, if route matches the path:
+First let assume we have everything at hand, the path from the HTTP request and a valid, parsed route pattern. Let's define a function to does the matching and computes a resolved `Path` value for us, if route matches the path:
 
 ``` haskell
 matcher : (s : String) -- path from HTTP request
@@ -172,6 +173,7 @@ pattern str req =
      Just p => Just $ { path := p } req
      Nothing => Nothing
 ```
+_See record update syntax details at [updates documentation](https://idris2.readthedocs.io/en/latest/updates/updates.html#record-updates)_
 
 But our task is to get the compiler to provide us the missing `parsedPattern`. It is easier then someone would assume.
 
@@ -185,7 +187,7 @@ The only task is to pattern match on the `parsed` implicit parameter and extract
 export
 pattern :
   (str : String)
-  -> {default (Path.parse str) parsed : _} -- initialize 'parsed' with the parse result, it's type is determined by the function return type
+  -> {default (Path.parse str) parsed : _} -- initialize 'parsed' with the parse result, it's type is determined by the function type
   -> {auto 0 ok : IsRight parsed } -- prove that the result is a 'Right' value
   -> Request String 
   -> Maybe $ Request Path
@@ -194,6 +196,8 @@ pattern str {parsed = (Right parsedPattern)} req = -- pattern match
      Just p => Just $ { path := p } req
      Nothing => Nothing
 ```
+_See more details on [auto implicit arguments](https://idris2.readthedocs.io/en/latest/tutorial/miscellany.html#default-implicit-arguments)
+and [default implicit arguments](https://idris2.readthedocs.io/en/latest/tutorial/miscellany.html#default-implicit-arguments) in the idris crash course_
 
 The resulting function is covering all possible inputs, and we don't need to provide implementation to handle the `Left` case.
 
@@ -211,44 +215,46 @@ Uninhabited (IsRight (Left x)) where
 
 #### Testing some cases
 
-The following examples all pass (but sometimes return Nothing as the route is not matching the path):
+The following examples all pass (but sometimes results in a Nothing as the route is not matching the path):
 
 ``` haskell
-  ignore $ pure $ pattern "/" $ MkRequest "/about.html"
-  ignore $ pure $ pattern "/about.{ext}" $ MkRequest "/about.html"
-  ignore $ pure $ pattern "/{file}.html" $ MkRequest "/post.html"
-  ignore $ pure $ pattern "/user/{id}" $ MkRequest "/"
-  ignore $ pure $ pattern "/user/{id}/profile" $ MkRequest "/user/423/profile"
-  ignore $ pure $ pattern "/user/{id}/post/{post-id}" $ MkRequest "/user/423/post/92732"
-  ignore $ pure $ pattern "/static/*" $ MkRequest "/static/assets/main.css"
-  ignore $ pure $ pattern ("/" <+> "static" <+> "/*") $ MkRequest "/index.html"
+  pattern "/" $ MkRequest "/about.html"
+  pattern "/about.{ext}" $ MkRequest "/about.html"
+  pattern "/{file}.html" $ MkRequest "/post.html"
+  pattern "/user/{id}" $ MkRequest "/"
+  pattern "/user/{id}/profile" $ MkRequest "/user/423/profile"
+  pattern "/user/{id}/post/{post-id}" $ MkRequest "/user/423/post/92732"
+  pattern "/static/*" $ MkRequest "/static/assets/main.css"
+  pattern ("/" <+> "static" <+> "/*") $ MkRequest "/index.html"
 ```
 
 The below examples are failing, due to compile error (as you can see the compile errors are included as comments):
 
 ``` haskell
 -- Error: While processing right hand side of main. Can't find an implementation for (IsRight (Left EmptyPattern).
-  ignore $ pure $ pattern "" $ MkRequest "/index.html"
+  pattern "" $ MkRequest "/index.html"
 
 -- Error: While processing right hand side of main. Can't find an implementation for IsRight (Left (ParamEmpty "{}" [Literal ['/']])).
-  ignore $ pure $ pattern "/{}" $ MkRequest "/index.html"
+  pattern "/{}" $ MkRequest "/index.html"
 
 -- Error: While processing right hand side of main. Can't find an implementation for IsRight (Left (ParamAlreadyDefined "id" [Literal ['/'],
 --                                             Param ['i', 'd'],
 --                                             Literal ['/', 'o', 't', 'h', 'e', 'r', '/']])).
-  ignore $ pure $ pattern "/{id}/other/{id}" $ MkRequest "/index.html"
+  pattern "/{id}/other/{id}" $ MkRequest "/index.html"
 
 -- Error: While processing right hand side of main. Can't find an implementation for IsRight (parse (prim__strAppend (prim__strAppend "/" static) "/*")).
   let static = "static"
-  ignore $ pure $ pattern ("/" <+> static <+> "/*") $ MkRequest "/index.html"
+  in pattern ("/" <+> static <+> "/*") $ MkRequest "/index.html"
 ```
 
 If you want to see these examples, and the rest of the implementation in action, you can find the source code on [github](https://github.com/kbertalan/kbertalan.github.io/tree/main/assets/posts/idris).
 
 #### Conclusion
 
-Type level programming can be straigthforward, in our case we had to add two implicit parameters to a function, pattern match on one of them, and make the definition of another function available for other modules.
+Dependently typed programming can be straigthforward, in our case we had to add two implicit parameters to a function, pattern match on one of them, and make the definition of another function available for other modules.
 
-However there are also consequences, this method works only on static strings. If you construct the route pattern using other functions, or from bounded values, then the compiler cannot normalize the value anymore in compile time.
+However there are also consequences, this works the best on static strings. If you construct the route pattern using other functions, or from bounded values in runtime, then the compiler cannot normalize the value anymore in compile time.
 
-In those cases the developer will need to parse the route pattern and deal with the error case, which is not a bad idea anyway.
+In those cases the developer will need to bring the evidence of the route pattern validity and deal with the error case, which is not a bad idea anyway.
+
+__Updated at 2021-11-01__: changes based on feedback of [Andor Pénzes](https://github.com/andorp)
