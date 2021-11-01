@@ -151,7 +151,7 @@ Also note that `parse` function is annotated with `public export`, which exposes
 
 #### Parse route for pattern function
 
-First let assume we have everything at hand, the path from the HTTP request and a valid, parsed route pattern. Let's define a function to does the matching and computes a resolved `Path` value for us, if route matches the path:
+First let assume we have everything at hand, the path from the HTTP request and a valid, parsed route pattern. Let's define a function to do the matching and compute a resolved `Path` value for us, if route matches the path:
 
 ``` haskell
 matcher : (s : String) -- path from HTTP request
@@ -177,7 +177,7 @@ _See record update syntax details at [updates documentation](https://idris2.read
 
 But our task is to get the compiler to provide us the missing `parsedPattern`. It is easier then someone would assume.
 
-To run automatically our parse method, we will introduce a new implicit parameter called `parsed` and initialize with the parsed route. This default value will still be running in runtime, though. And it can still can have a `Left` value. We don't really want to handle the error case at runtime.
+To run automatically our parse method, we will introduce a new implicit parameter called `parsed` and initialize with the parsed route. This default value will still be running in runtime, though. And it can still have a `Left` value. We don't really want to handle the error case at runtime.
 
 To convince the compiler, we need to provide a proof that the parsed pattern is a `Right` value. For this we will use the `IsRight` data type and pass the parse result to it as a parameter. The result is that the parsing expression will be evaluated at compile time to find out wether the result is `Left` or `Right`.
 
