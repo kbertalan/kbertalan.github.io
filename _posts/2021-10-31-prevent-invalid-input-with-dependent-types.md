@@ -201,6 +201,8 @@ and [default implicit arguments](https://idris2.readthedocs.io/en/latest/tutoria
 
 The resulting function is covering all possible inputs, and we don't need to provide implementation to handle the `Left` case.
 
+_(Unfortunatelly there is an issue with this implementation, what is described in the [next post]({% link _posts/2021-11-02-prevent-invalid-input-with-dependent-types-fix.md %}). But don't worry the remaining of this post is still valid.)_
+
 If you are an idris pacticioner, then you will notice that `IsRight` is not available in idris at the time of writing of this post. It is similar to the `IsJust` type defined in `Data.Maybe` module of the `base` package, and it looks like this:
 
 ``` haskell
@@ -258,3 +260,4 @@ However there are also consequences, this works the best on static strings. If y
 In those cases the developer will need to bring the evidence of the route pattern validity and deal with the error case, which is not a bad idea anyway.
 
 __Updated at 2021-11-01__: changes based on feedback of [Andor Pénzes](https://github.com/andorp)
+__Updated at 2021-11-02__: link to another post about a revealed issue

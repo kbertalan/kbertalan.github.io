@@ -23,3 +23,4 @@ exclude:
   - Gemfile
   - Gemfile.lock
   - assets/posts/idris/build/
+  - assets/posts/idris-fix/build/
