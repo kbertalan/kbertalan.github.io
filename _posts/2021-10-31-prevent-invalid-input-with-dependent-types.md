@@ -260,4 +260,5 @@ However there are also consequences, this works the best on static strings. If y
 In those cases the developer will need to bring the evidence of the route pattern validity and deal with the error case, which is not a bad idea anyway.
 
 __Updated at 2021-11-01__: changes based on feedback of [Andor Pénzes](https://github.com/andorp)
+
 __Updated at 2021-11-02__: link to another post about a revealed issue
